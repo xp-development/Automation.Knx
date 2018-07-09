@@ -1,0 +1,8 @@
+
+Automation/.vs/Automation/DesignTimeBuild/*
+Automation/.vs/Automation/v15/*
+**/bin/Debug/**
+**/obj/Debug/**
+Automation/Automation.Knx/obj/**
+Automation/Automation.sln.DotSettings.user
+Automation/packages/**
