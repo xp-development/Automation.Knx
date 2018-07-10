@@ -24,8 +24,9 @@ assembly_info:
   assembly_informational_version: '{version}'
   
 test:
-  assemblies: Automation.Knx.UnitTest
-  
+  assemblies:
+    only:
+      - '**\*.UnitTest.dll'
 artifacts:
   - path: '**\Automation.Knx*.nupkg'
     name: Automation.Knx.nupkg
