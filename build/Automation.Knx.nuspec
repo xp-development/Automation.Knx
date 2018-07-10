@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>Automation.Knx</id>
+    <version>$Version$-alpha</version>
+    <title>Automation.Knx</title>
+    <authors>jan-schubert</authors>
+    <owners>jan-schubert</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/jan-schubert/Automation.Knx/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/jan-schubert/Automation.Knx</projectUrl>
+    <description>Automation.Knx</description>
+    <summary></summary>
+    <releaseNotes></releaseNotes>
+    <tags>Automation KNX</tags>
+  </metadata>
+  <files>
+    <file src="../Source/Automation.Knx/bin/$Configuration$/Automation.Knx.dll" target="lib\netstandard2.0" />
+  </files>
+</package>

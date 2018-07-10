@@ -1,0 +1,37 @@
+branches:
+    only:
+      - master
+
+version: 2018.0.{build}
+configuration: Release
+
+before_build:
+- ps: nuget restore Source\Automation.sln
+
+build:
+  verbosity: minimal
+
+after_build:
+  - cmd: nuget pack build/Automation.Knx.nuspec -Properties Configuration=%configuration% -Version %appveyor_build_version% -NoDefaultExcludes
+
+assembly_info:
+  patch: true
+  file: AssemblyInfo.cs
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+  
+test:
+  assemblies: Automation.Knx.UnitTest
+  
+artifacts:
+  - path: '**\Automation.Knx*.nupkg'
+    name: Automation.Knx.nupkg
+
+deploy:
+  provider: NuGet
+  symbol_server: https://ci.appveyor.com/nuget/jan-schubert/api/v2/package
+  api_key:
+    secure: EEzMZXyGYmDBGcZfcOsS1QB+8iHT760Kg/ML6l0jHL+wxqMaZYqWSztF0VlpyBCL
+  skip_symbols: true
+  artifact: /Automation.Knx\..*\.nupkg/
