@@ -8,6 +8,8 @@ configuration: Release
 before_build:
 - ps: nuget restore Source\Automation.sln
 
+image: Visual Studio 2017
+
 build:
   verbosity: minimal
 
