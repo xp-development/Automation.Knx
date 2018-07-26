@@ -8,15 +8,11 @@ namespace Automation.Knx.TestConsole
   {
     public static async Task Main(string[] args)
     {
-      Console.WriteLine("Receive IP:");
-      var receiveIp = Console.ReadLine();
-      Console.WriteLine("Receive port:");
-      var receivePort = Convert.ToInt32(Console.ReadLine());
       Console.WriteLine("Send IP:");
       var sendIp = Console.ReadLine();
       Console.WriteLine("Send port:");
       var sendPort = Convert.ToInt32(Console.ReadLine());
-      var connection = new Connection(new IPEndPoint(IPAddress.Parse(receiveIp), receivePort), new IPEndPoint(IPAddress.Parse(sendIp), sendPort));
+      var connection = new Connection(new IPEndPoint(IPAddress.Any, 45678), new IPEndPoint(IPAddress.Parse(sendIp), sendPort));
 
       connection.Connected += (sender, response) =>
         Console.WriteLine(

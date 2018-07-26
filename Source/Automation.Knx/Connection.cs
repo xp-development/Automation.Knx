@@ -21,7 +21,7 @@ namespace Automation.Knx
     private Task _sendTask;
 
     public Connection(IPEndPoint receiveEndPoint, IPEndPoint sendEndPoint)
-      : this(receiveEndPoint, sendEndPoint, new ReceiveParserDispatcher(new IKnxReceiveParser[] { new ConnectResponseParser(), new TunnelResponseParser(), new TunnelRequestParser() }), new UdpClient(receiveEndPoint))
+      : this(receiveEndPoint, sendEndPoint, new ReceiveParserDispatcher(new IKnxReceiveParser[] { new ConnectResponseParser(), new TunnelResponseParser(), new TunnelRequestParser(), new DisconnectResponseParser() }), new UdpClient(receiveEndPoint))
     {
     }
 
@@ -48,7 +48,7 @@ namespace Automation.Knx
     public void Disconnect()
     {
       _sendMessages.Add(new DisconnectRequestBuilder().Build(_communicationChannel, _receiveEndPoint));
-      Task.WaitAll(_sendTask, _receiveTask);
+      Task.WaitAll(new []{ _sendTask, _receiveTask }, 300);
     }
 
     public Task SendAsync(IKnxAddress receivingAddress, IKnxData data)

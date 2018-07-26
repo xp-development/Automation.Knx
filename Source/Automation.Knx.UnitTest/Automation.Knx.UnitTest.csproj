@@ -75,6 +75,7 @@
     <Compile Include="_Connection\IsConnected.cs" />
     <Compile Include="_Connection\TestBase.cs" />
     <Compile Include="_Connection\UdpClientFake.cs" />
+    <Compile Include="_ReceiveParsers\_DisconnectResponseParser\Build.cs" />
     <Compile Include="_RequestBuilders\_DisconnectRequestBuilder\Build.cs" />
     <Compile Include="_ReceiveMessages\_HostProtocolAddressInformation\GetBytes.cs" />
     <Compile Include="_ReceiveParsers\_ReceiveParserDispatcher\Build.cs" />
