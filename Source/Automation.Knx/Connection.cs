@@ -13,12 +13,13 @@ namespace Automation.Knx
     private readonly IPEndPoint _receiveEndPoint;
     private readonly IKnxReceiveParserDispatcher _receiveParserDispatcher;
     private readonly IPEndPoint _sendEndPoint;
-    private readonly BlockingCollection<byte[]> _sendMessages = new BlockingCollection<byte[]>();
     private readonly IUdpClient _udpClient;
+    private BlockingCollection<byte[]> _sendMessages;
     private byte _communicationChannel;
     private byte _sequenceCounter;
     private Task _receiveTask;
     private Task _sendTask;
+    private bool _isDisconnecting;
 
     public Connection(IPEndPoint receiveEndPoint, IPEndPoint sendEndPoint)
       : this(receiveEndPoint, sendEndPoint, new ReceiveParserDispatcher(new IKnxReceiveParser[] { new ConnectResponseParser(), new TunnelResponseParser(), new TunnelRequestParser(), new DisconnectResponseParser() }), new UdpClient(receiveEndPoint))
@@ -40,6 +41,9 @@ namespace Automation.Knx
 
     public void Connect()
     {
+      if (_sendMessages == null || _sendMessages.IsAddingCompleted)
+        _sendMessages = new BlockingCollection<byte[]>();
+
       ProcessSendMessages();
 
       _sendMessages.Add(new ConnectRequestBuilder().Build(_receiveEndPoint));
@@ -47,8 +51,13 @@ namespace Automation.Knx
 
     public void Disconnect()
     {
+      if (_isDisconnecting || !IsConnected)
+        return;
+
+      _isDisconnecting = true;
       _sendMessages.Add(new DisconnectRequestBuilder().Build(_communicationChannel, _receiveEndPoint));
       Task.WaitAll(new []{ _sendTask, _receiveTask }, 300);
+      _isDisconnecting = false;
     }
 
     public Task SendAsync(IKnxAddress receivingAddress, IKnxData data)
@@ -90,7 +99,11 @@ namespace Automation.Knx
             case DisconnectResponse disconnectResponse:
               IsConnected = false;
               _communicationChannel = 0;
-              _sendMessages.CompleteAdding();
+              if (!_sendMessages.IsAddingCompleted)
+              {
+                _sendMessages.CompleteAdding();
+              }
+
               Disconnected?.Invoke(this, disconnectResponse);
               return;
           }
