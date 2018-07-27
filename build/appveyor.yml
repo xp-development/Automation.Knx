@@ -2,7 +2,7 @@ branches:
     only:
       - master
 
-version: 2018.0.{build}
+version: 2018.0.{build}-alpha
 configuration: Release
 
 before_build:

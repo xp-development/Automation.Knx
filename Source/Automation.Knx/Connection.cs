@@ -14,12 +14,9 @@ namespace Automation.Knx
     private readonly IKnxReceiveParserDispatcher _receiveParserDispatcher;
     private readonly IPEndPoint _sendEndPoint;
     private readonly IUdpClient _udpClient;
-    private BlockingCollection<byte[]> _sendMessages;
+    private readonly BlockingCollection<byte[]> _sendMessages = new BlockingCollection<byte[]>();
     private byte _communicationChannel;
     private byte _sequenceCounter;
-    private Task _receiveTask;
-    private Task _sendTask;
-    private bool _isDisconnecting;
 
     public Connection(IPEndPoint receiveEndPoint, IPEndPoint sendEndPoint)
       : this(receiveEndPoint, sendEndPoint, new ReceiveParserDispatcher(new IKnxReceiveParser[] { new ConnectResponseParser(), new TunnelResponseParser(), new TunnelRequestParser(), new DisconnectResponseParser() }), new UdpClient(receiveEndPoint))
@@ -32,6 +29,7 @@ namespace Automation.Knx
       _receiveParserDispatcher = receiveParserDispatcher;
       _sendEndPoint = sendEndPoint;
       _udpClient = udpClient;
+      ProcessSendMessages();
     }
 
     public bool IsConnected { get; private set; }
@@ -41,23 +39,15 @@ namespace Automation.Knx
 
     public void Connect()
     {
-      if (_sendMessages == null || _sendMessages.IsAddingCompleted)
-        _sendMessages = new BlockingCollection<byte[]>();
-
-      ProcessSendMessages();
-
       _sendMessages.Add(new ConnectRequestBuilder().Build(_receiveEndPoint));
     }
 
     public void Disconnect()
     {
-      if (_isDisconnecting || !IsConnected)
+      if (!IsConnected)
         return;
 
-      _isDisconnecting = true;
       _sendMessages.Add(new DisconnectRequestBuilder().Build(_communicationChannel, _receiveEndPoint));
-      Task.WaitAll(new []{ _sendTask, _receiveTask }, 300);
-      _isDisconnecting = false;
     }
 
     public Task SendAsync(IKnxAddress receivingAddress, IKnxData data)
@@ -65,15 +55,14 @@ namespace Automation.Knx
       if (!IsConnected)
         throw new NotConnectedException();
 
-      var bytes = new TunnelRequestBuilder().Build(_communicationChannel, _sequenceCounter++, receivingAddress, data);
-      _sendMessages.Add(bytes);
+      _sendMessages.Add(new TunnelRequestBuilder().Build(_communicationChannel, _sequenceCounter++, receivingAddress, data));
 
       return Task.CompletedTask;
     }
 
     private void ProcessSendMessages()
     {
-      _receiveTask = Task.Run(async () =>
+      Task.Run(async () =>
       {
         while (true)
         {
@@ -85,32 +74,26 @@ namespace Automation.Knx
               if (connectResponse.Status == 0x00)
               {
                 _sequenceCounter = 0;
-                IsConnected = true;
                 _communicationChannel = connectResponse.CommunicationChannel;
+                IsConnected = true;
                 Connected?.Invoke(this, connectResponse);
               }
 
               break;
             case TunnelRequest tunnelRequest:
-              _sendMessages.Add(new TunnelResponse(0x06, 0x10, 0x0A, 0x04, _communicationChannel,
-                tunnelRequest.SequenceCounter, 0x00).GetBytes());
+              _sendMessages.Add(new TunnelResponse(0x06, 0x10, 0x0A, 0x04, _communicationChannel, tunnelRequest.SequenceCounter, 0x00).GetBytes());
               break;
 
             case DisconnectResponse disconnectResponse:
               IsConnected = false;
               _communicationChannel = 0;
-              if (!_sendMessages.IsAddingCompleted)
-              {
-                _sendMessages.CompleteAdding();
-              }
-
               Disconnected?.Invoke(this, disconnectResponse);
-              return;
+              break;
           }
         }
       });
 
-      _sendTask = Task.Run(() =>
+      Task.Run(() =>
       {
         foreach (var sendMessage in _sendMessages.GetConsumingEnumerable())
           _udpClient.SendAsync(sendMessage, _sendEndPoint);

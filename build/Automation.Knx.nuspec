@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Automation.Knx</id>
-    <version>$Version$-alpha</version>
+    <version>$Version$</version>
     <title>Automation.Knx</title>
     <authors>jan-schubert</authors>
     <owners>jan-schubert</owners>
