@@ -8,7 +8,7 @@ namespace Automation.Knx.UnitTest._UniCastAddress
     [Fact]
     public void Usage()
     {
-      const string address = "1/1/40";
+      const string address = "1.1.40";
 
       var uniCastAddress = UniCastAddress.FromString(address);
 

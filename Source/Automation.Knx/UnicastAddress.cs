@@ -27,7 +27,7 @@ namespace Automation.Knx
 
     public static UniCastAddress FromString(string address)
     {
-      var addressParts = address.Split('/');
+      var addressParts = address.Split('.');
       if (addressParts.Length != 3)
         throw new Exception("Invalid address string.");
 
