@@ -44,6 +44,6 @@ deploy:
   provider: NuGet
   symbol_server: https://ci.appveyor.com/nuget/jan-schubert/api/v2/package
   api_key:
-    secure: XKDJr1+UoBcliPwhiBM321fs0zq3E8aGCr+xYS7/pfF7dh++25zNP478OPhi+29I
+    secure: oy2d3ekgj5eqrznnxrdawq5wlgscdhterewedgb7wtvsg4
   skip_symbols: true
   artifact: /Automation.Knx\..*\.nupkg/
